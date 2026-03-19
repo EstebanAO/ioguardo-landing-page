@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import type { SVGProps } from "react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import storageOptionsData from "@/data/storageOptions.json";
 
 type StorageOption = {
   id: string;
   title: string;
+  tipo: string;
   size: string;
   monthlyPrice: number;
   cta: string;
@@ -234,24 +235,24 @@ function StorageSection() {
         Tarifa base: $350 MXN por m² + IVA · Precios mensuales
       </p>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {storageOptions.map((option) => (
           <article
             key={option.id}
-            className="flex flex-col rounded-3xl border border-primary/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-secondary/50"
+            className="flex flex-col items-center rounded-2xl border border-primary/10 bg-white px-4 py-6 text-center shadow-sm transition hover:-translate-y-1 hover:border-secondary/50"
           >
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-muted">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted">
               {option.title}
             </p>
-            <p className="mt-1 text-sm text-muted">{option.size}</p>
-            <p className="mt-4 text-3xl font-bold text-primary">
+            <p className="mt-0.5 text-xs text-muted">Tipo {option.tipo} · {option.size}</p>
+            <p className="mt-3 text-3xl font-bold text-primary">
               ${option.monthlyPrice.toLocaleString()}
-              <span className="text-base font-normal text-muted"> /mes</span>
+              <span className="text-sm font-normal text-muted">/mes</span>
             </p>
-            <p className="mt-1 text-xs text-muted">desde · + IVA</p>
+            <p className="mt-0.5 text-xs text-muted">+ IVA</p>
             <a
               href="#contacto"
-              className="mt-6 rounded-full bg-secondary px-4 py-3 text-center text-sm font-semibold uppercase tracking-wide text-white transition hover:-translate-y-0.5"
+              className="mt-4 w-full rounded-full bg-secondary px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white transition hover:-translate-y-0.5"
             >
               {option.cta}
             </a>
@@ -265,27 +266,78 @@ function StorageSection() {
         <strong className="text-primary"> 7% dto. pago semestral/anual</strong>
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="overflow-hidden rounded-2xl">
-          <Image
-            src="/interior-lockers-wide.jpg"
-            alt="Pasillo de lockers y bodegas pequeñas numeradas"
-            width={1600}
-            height={900}
-            className="h-52 w-full object-cover sm:h-56"
-          />
-        </div>
-        <div className="overflow-hidden rounded-2xl">
-          <Image
-            src="/interior-corridor-wide.jpg"
-            alt="Pasillo de bodegas grandes en planta baja"
-            width={1600}
-            height={900}
-            className="h-52 w-full object-cover sm:h-56"
-          />
-        </div>
-      </div>
+      <PhotoCarousel />
     </section>
+  );
+}
+
+const carouselPhotos = [
+  { src: "/interior-lockers-wide.jpg", alt: "Pasillo de lockers y bodegas pequeñas numeradas" },
+  { src: "/interior-corridor-wide.jpg", alt: "Pasillo de bodegas grandes en planta baja" },
+  { src: "/interior-twofloor-wide.jpg", alt: "Estructura de dos pisos con escaleras" },
+  { src: "/location-exterior.jpg", alt: "Exterior de las instalaciones" },
+];
+
+function PhotoCarousel() {
+  const [current, setCurrent] = useState(0);
+
+  const next = useCallback(
+    () => setCurrent((c) => (c + 1) % carouselPhotos.length),
+    []
+  );
+  const prev = () =>
+    setCurrent((c) => (c - 1 + carouselPhotos.length) % carouselPhotos.length);
+
+  useEffect(() => {
+    const timer = setInterval(next, 4000);
+    return () => clearInterval(timer);
+  }, [next]);
+
+  return (
+    <div className="relative mt-8 overflow-hidden rounded-2xl">
+      <div
+        className="flex transition-transform duration-500 ease-in-out"
+        style={{ transform: `translateX(-${current * 100}%)` }}
+      >
+        {carouselPhotos.map((photo) => (
+          <div key={photo.src} className="w-full flex-shrink-0">
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              width={1600}
+              height={900}
+              className="h-56 w-full object-cover sm:h-72"
+            />
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={prev}
+        className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-primary shadow backdrop-blur-sm transition hover:bg-white"
+        aria-label="Foto anterior"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+      <button
+        onClick={next}
+        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-primary shadow backdrop-blur-sm transition hover:bg-white"
+        aria-label="Siguiente foto"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+      <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
+        {carouselPhotos.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`h-2 rounded-full transition-all ${
+              i === current ? "w-6 bg-white" : "w-2 bg-white/50"
+            }`}
+            aria-label={`Ir a foto ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
