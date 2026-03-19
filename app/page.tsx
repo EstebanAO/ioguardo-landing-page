@@ -1,65 +1,701 @@
+"use client";
+
 import Image from "next/image";
+import type { SVGProps } from "react";
+import { useState } from "react";
+import storageOptionsData from "@/data/storageOptions.json";
+
+type StorageOption = {
+  id: string;
+  title: string;
+  size: string;
+  monthlyPrice: number;
+  cta: string;
+};
+
+const storageOptions = storageOptionsData as StorageOption[];
+
+const navLinks = [
+  { label: "Inicio", href: "#inicio" },
+  { label: "Bodegas y Precios", href: "#bodegas" },
+  { label: "Planos", href: "#planos" },
+  { label: "Ubicación", href: "#ubicacion" },
+  { label: "Contacto", href: "#contacto" },
+  { label: "FAQ", href: "#faq" },
+];
+
+const benefits = [
+  {
+    title: "Almacenamiento Seguro",
+    description:
+      "Instalaciones dentro de parque industrial con acceso controlado para la protección de tus pertenencias.",
+    icon: ShieldIcon,
+  },
+  {
+    title: "Flexibilidad de Espacios",
+    description:
+      "Desde lockers de 3 m² hasta bodegas de 22.5 m². Plazos desde 3 meses con opción de cambiar de tamaño.",
+    icon: ResizeIcon,
+  },
+  {
+    title: "Descuentos por Pago Anticipado",
+    description:
+      "4% de descuento en pago bimestral y 7% en pago semestral o anual.",
+    icon: TagIcon,
+  },
+  {
+    title: "Ubicación Estratégica",
+    description:
+      "Parque Industrial TerraPark Centenario, Querétaro. Fácil acceso y estacionamiento.",
+    icon: PinIcon,
+  },
+];
+
+const faqItems = [
+  {
+    question: "¿Qué puedo guardar en mi bodega?",
+    answer:
+      "Objetos personales, muebles, documentos, inventario y más. Está prohibido almacenar materiales peligrosos, sustancias inflamables u objetos que infrinjan la ley.",
+  },
+  {
+    question: "¿Cuál es el horario de acceso?",
+    answer:
+      "Lunes a viernes de 9:00 a 18:00 hrs y sábados de 10:00 a 14:00 hrs. Domingos cerrado.",
+  },
+  {
+    question: "¿Cuál es el plazo mínimo de renta?",
+    answer: "El plazo mínimo de renta es de 3 meses.",
+  },
+  {
+    question: "¿Cómo puedo cancelar mi contrato?",
+    answer:
+      "Con 30 días de aviso previo, según lo estipulado en tu contrato.",
+  },
+  {
+    question: "¿Puedo cambiar el tamaño de mi bodega?",
+    answer:
+      "Sí, ofrecemos flexibilidad para adaptarte a tus necesidades. Puedes solicitar un cambio de tamaño sujeto a disponibilidad.",
+  },
+  {
+    question: "¿Qué documentos necesito para rentar?",
+    answer:
+      "Identificación oficial y comprobante de domicilio. Además se requiere un depósito de garantía equivalente a 1 mes de renta.",
+  },
+  {
+    question: "¿Los precios incluyen IVA?",
+    answer:
+      "No, todos los precios publicados son más IVA.",
+  },
+];
+
+const legalLinks = [
+  { label: "Aviso de Privacidad", href: "#" },
+  { label: "Términos y Condiciones", href: "#" },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <div className="bg-surface text-primary" id="inicio">
+      <div className="mx-auto min-h-screen max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+        <Header />
+        <Hero />
+        <Benefits />
+        <StorageSection />
+        <FloorPlans />
+        <Location />
+        <Contact />
+        <FAQ />
+      </div>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <header className="flex flex-col gap-4 border-b border-primary/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/logo_svg_io_guardo.svg"
+          alt="logo io guardo"
+          width={200}
+          height={90}
+          className="h-12 w-auto"
           priority
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+        <span className="text-xs uppercase tracking-[0.2em] text-muted">
+          Bodegas en Querétaro
+        </span>
+      </div>
+      <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-primary">
+        {navLinks.map((link) => (
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            key={link.label}
+            href={link.href}
+            className="transition hover:text-secondary"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </header>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="grid gap-10 pt-12 lg:grid-cols-2 lg:items-center">
+      <div className="space-y-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary">
+          Bodegas en Querétaro
+        </p>
+        <h1 className="font-heading text-4xl font-semibold leading-tight text-primary sm:text-5xl">
+          Almacenamiento simple, seguro y eficiente.
+        </h1>
+        <p className="text-lg text-muted">
+          Espacios diseñados para ofrecer almacenamiento confiable con acceso
+          práctico y sin complicaciones en Parque Industrial TerraPark
+          Centenario, Querétaro.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <a
+            href="#bodegas"
+            className="rounded-full bg-secondary px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondary/30 transition hover:-translate-y-0.5"
+          >
+            Ver Bodegas y Precios
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#contacto"
+            className="rounded-full border border-primary/30 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-primary transition hover:bg-primary/5"
           >
-            Documentation
+            Contáctanos
           </a>
         </div>
-      </main>
+      </div>
+      <div className="relative overflow-hidden rounded-3xl shadow-xl">
+        <Image
+          src="/interior-twofloor-wide.jpg"
+          alt="Interior de las bodegas io guardo — dos niveles con escaleras y bodegas grandes"
+          width={1600}
+          height={900}
+          className="h-auto w-full object-cover"
+          priority
+        />
+      </div>
+    </section>
+  );
+}
+
+function Benefits() {
+  return (
+    <section className="mt-[var(--section-space)]" id="beneficios">
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary">
+        ¿Por qué io guardo?
+      </p>
+      <h2 className="mt-4 font-heading text-3xl font-semibold text-primary">
+        Tu espacio de confianza
+      </h2>
+      <div className="mt-10 grid gap-6 md:grid-cols-2">
+        {benefits.map((benefit) => (
+          <article
+            key={benefit.title}
+            className="rounded-2xl border border-primary/10 bg-white p-6 shadow-sm"
+          >
+            <benefit.icon className="h-10 w-10 text-secondary" />
+            <h3 className="mt-4 text-xl font-semibold text-primary">
+              {benefit.title}
+            </h3>
+            <p className="mt-2 text-muted">{benefit.description}</p>
+          </article>
+        ))}
+      </div>
+      <div className="mt-8 overflow-hidden rounded-3xl shadow-lg">
+        <Image
+          src="/hero-exterior.jpg"
+          alt="Fachada de las instalaciones io guardo en Parque Industrial TerraPark"
+          width={1600}
+          height={1067}
+          className="h-64 w-full object-cover lg:h-96"
+        />
+      </div>
+    </section>
+  );
+}
+
+function StorageSection() {
+  return (
+    <section className="mt-[var(--section-space)]" id="bodegas">
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary">
+        Bodegas y precios
+      </p>
+      <h2 className="mt-4 font-heading text-3xl font-semibold text-primary">
+        Encuentra el Espacio Ideal
+      </h2>
+      <p className="mt-2 text-sm text-muted">
+        Tarifa base: $350 MXN por m² + IVA · Precios mensuales
+      </p>
+
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {storageOptions.map((option) => (
+          <article
+            key={option.id}
+            className="flex flex-col rounded-3xl border border-primary/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-secondary/50"
+          >
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-muted">
+              {option.title}
+            </p>
+            <p className="mt-1 text-sm text-muted">{option.size}</p>
+            <p className="mt-4 text-3xl font-bold text-primary">
+              ${option.monthlyPrice.toLocaleString()}
+              <span className="text-base font-normal text-muted"> /mes</span>
+            </p>
+            <p className="mt-1 text-xs text-muted">desde · + IVA</p>
+            <a
+              href="#contacto"
+              className="mt-6 rounded-full bg-secondary px-4 py-3 text-center text-sm font-semibold uppercase tracking-wide text-white transition hover:-translate-y-0.5"
+            >
+              {option.cta}
+            </a>
+          </article>
+        ))}
+      </div>
+
+      <p className="mt-6 text-sm text-muted">
+        Tarifa base: $350 MXN/m² + IVA · Depósito: 1 mes de renta ·
+        <strong className="text-primary"> 4% dto. pago bimestral</strong> ·
+        <strong className="text-primary"> 7% dto. pago semestral/anual</strong>
+      </p>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="overflow-hidden rounded-2xl">
+          <Image
+            src="/interior-lockers-wide.jpg"
+            alt="Pasillo de lockers y bodegas pequeñas numeradas"
+            width={1600}
+            height={900}
+            className="h-52 w-full object-cover sm:h-56"
+          />
+        </div>
+        <div className="overflow-hidden rounded-2xl">
+          <Image
+            src="/interior-corridor-wide.jpg"
+            alt="Pasillo de bodegas grandes en planta baja"
+            width={1600}
+            height={900}
+            className="h-52 w-full object-cover sm:h-56"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FloorPlans() {
+  const [floor, setFloor] = useState<"baja" | "alta">("baja");
+  return (
+    <section className="mt-[var(--section-space)]" id="planos">
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary">
+        Planos
+      </p>
+      <h2 className="mt-4 font-heading text-3xl font-semibold text-primary">
+        Conoce la Distribución
+      </h2>
+      <div className="mt-6 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setFloor("baja")}
+          className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+            floor === "baja"
+              ? "bg-secondary text-white"
+              : "border border-primary/20 text-primary hover:bg-primary/5"
+          }`}
+        >
+          Planta Baja
+        </button>
+        <button
+          type="button"
+          onClick={() => setFloor("alta")}
+          className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+            floor === "alta"
+              ? "bg-secondary text-white"
+              : "border border-primary/20 text-primary hover:bg-primary/5"
+          }`}
+        >
+          Planta Alta
+        </button>
+      </div>
+      <div className="mt-6 rounded-3xl border border-primary/10 bg-white p-4 shadow-sm sm:p-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={
+            floor === "baja"
+              ? "/plano-planta-baja.svg"
+              : "/plano-planta-alta.svg"
+          }
+          alt={`Plano ${floor === "baja" ? "Planta Baja" : "Planta Alta"} — io guardo`}
+          className="mx-auto h-auto max-h-[60vh] max-w-md object-contain"
+        />
+      </div>
+    </section>
+  );
+}
+
+function Location() {
+  return (
+    <section className="mt-[var(--section-space)]" id="ubicacion">
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary">
+        Ubicación
+      </p>
+      <h2 className="mt-4 font-heading text-3xl font-semibold text-primary">
+        Encuéntranos
+      </h2>
+      <div className="mt-8 grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <LocationIcon className="mt-1 h-5 w-5 shrink-0 text-secondary" />
+            <div>
+              <p className="font-semibold text-primary">Dirección</p>
+              <p className="text-muted">
+                Parque Industrial TerraPark Centenario, Querétaro, México
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <ClockIcon className="mt-1 h-5 w-5 shrink-0 text-secondary" />
+            <div>
+              <p className="font-semibold text-primary">Horario de atención</p>
+              <p className="text-muted">Lunes a viernes: 9:00 – 18:00 hrs</p>
+              <p className="text-muted">Sábado: 10:00 – 14:00 hrs</p>
+              <p className="text-muted">Domingo: Cerrado</p>
+            </div>
+          </div>
+          <a
+            href="https://www.google.com/maps/place/20%C2%B039'56.9%22N+100%C2%B017'49.9%22W/@20.6658,-100.297199,17z"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:-translate-y-0.5"
+          >
+            <PinIcon className="h-4 w-4" />
+            Ver en Google Maps
+          </a>
+        </div>
+        <div className="overflow-hidden rounded-3xl shadow-lg">
+          <Image
+            src="/location-exterior.jpg"
+            alt="Vista exterior de las instalaciones io guardo"
+            width={1600}
+            height={1067}
+            className="h-auto w-full object-cover"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Contact() {
+  return (
+    <section className="mt-[var(--section-space)]" id="contacto">
+      <div className="rounded-[40px] bg-primary px-6 py-10 text-white shadow-2xl lg:px-12 lg:py-16">
+        <div className="grid gap-10 lg:grid-cols-2">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary/70">
+              Hablemos
+            </p>
+            <h2 className="mt-4 font-heading text-3xl font-semibold text-white">
+              Cuéntanos qué necesitas guardar
+            </h2>
+            <p className="mt-3 text-sm text-white/80">
+              Envíanos un mensaje para agendar una visita, solicitar una
+              cotización o resolver cualquier duda.
+            </p>
+            <div className="mt-8 space-y-4 text-sm">
+              <div className="flex items-start gap-3">
+                <LocationIcon className="mt-1 h-5 w-5 text-secondary" />
+                <div>
+                  <p className="font-semibold">Dirección</p>
+                  <p className="text-white/80">
+                    Parque Industrial TerraPark Centenario, Querétaro, México
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ClockIcon className="mt-1 h-5 w-5 text-secondary" />
+                <div>
+                  <p className="font-semibold">Horario</p>
+                  <p className="text-white/80">
+                    L-V 9:00–18:00 · Sáb 10:00–14:00
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <form className="space-y-4">
+              <label className="block text-sm font-semibold">
+                Nombre completo
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm placeholder:text-white/60 focus:border-secondary focus:outline-none"
+                  placeholder="Tu nombre"
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                Email
+                <input
+                  type="email"
+                  className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm placeholder:text-white/60 focus:border-secondary focus:outline-none"
+                  placeholder="tu@email.com"
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                Teléfono
+                <input
+                  type="tel"
+                  className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm placeholder:text-white/60 focus:border-secondary focus:outline-none"
+                  placeholder="Tu teléfono"
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                Tipo de mensaje
+                <select className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm text-white focus:border-secondary focus:outline-none">
+                  <option className="text-primary" value="cotizacion">
+                    Quiero una cotización
+                  </option>
+                  <option className="text-primary" value="visita">
+                    Quiero agendar una visita
+                  </option>
+                  <option className="text-primary" value="dudas">
+                    Otras dudas
+                  </option>
+                </select>
+              </label>
+              <button
+                type="submit"
+                className="w-full rounded-full bg-secondary px-4 py-3 text-sm font-semibold uppercase tracking-wide text-primary"
+              >
+                Contáctame
+              </button>
+            </form>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    </section>
+  );
+}
+
+function FAQ() {
+  return (
+    <section className="mt-[var(--section-space)]" id="faq">
+      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary">
+        Preguntas frecuentes
+      </p>
+      <h2 className="mt-4 font-heading text-3xl font-semibold text-primary">
+        ¿Tienes dudas?
+      </h2>
+      <div className="mt-8 space-y-3">
+        {faqItems.map((item) => (
+          <FAQItem
+            key={item.question}
+            question={item.question}
+            answer={item.answer}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FAQItem({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border border-primary/10 bg-white">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between px-6 py-4 text-left"
+      >
+        <span className="font-semibold text-primary">{question}</span>
+        <ChevronIcon
+          className={`h-5 w-5 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="border-t border-primary/5 px-6 py-4">
+          <p className="text-sm text-muted">{answer}</p>
+        </div>
+      )}
     </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mt-12 border-t border-white/20 pt-6 text-sm text-white/80">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <WarehouseIcon className="h-6 w-6 text-secondary" />
+            <span className="font-heading text-lg font-semibold text-white">
+              io guardo
+            </span>
+          </div>
+          <p className="text-xs text-white/60">
+            Parque Industrial TerraPark Centenario, Querétaro, México
+          </p>
+          <div className="flex flex-wrap gap-4 text-xs uppercase tracking-[0.3em]">
+            {legalLinks.map((link) => (
+              <a key={link.label} href={link.href} className="hover:text-white">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// Icons
+function LockIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <rect x="5" y="11" width="14" height="11" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+function ResizeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <path d="M10 4H4v6" />
+      <path d="m14 4 6 6" />
+      <path d="M20 14v6h-6" />
+      <path d="m4 14 6 6" />
+    </svg>
+  );
+}
+
+function ClockIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function PinIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <path d="M12 21s7-6.158 7-11a7 7 0 0 0-14 0c0 4.842 7 11 7 11z" />
+      <circle cx="12" cy="10" r="2" />
+    </svg>
+  );
+}
+
+function WarehouseIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <path d="M2 10 12 4l10 6" />
+      <path d="M4 10v10h16V10" />
+      <path d="M9 21V9h6v12" />
+    </svg>
+  );
+}
+
+function ShieldIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <path d="M12 22s8-3.5 8-11V5l-8-3-8 3v6c0 7.5 8 11 8 11z" />
+    </svg>
+  );
+}
+
+function TagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <path d="M12 2 2 7l10 5 10-5-10-5z" />
+      <path d="M2 17l10 5 10-5" />
+      <path d="M2 12l10 5 10-5" />
+    </svg>
+  );
+}
+
+function LocationIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      {...props}
+    >
+      <path d="M12 22s6-5 6-10a6 6 0 1 0-12 0c0 5 6 10 6 10z" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
+
+function ChevronIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   );
 }
