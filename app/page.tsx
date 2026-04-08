@@ -172,16 +172,7 @@ function Hero() {
           </a>
         </div>
       </div>
-      <div className="relative overflow-hidden rounded-3xl shadow-xl">
-        <Image
-          src="/interior-twofloor-wide.jpg"
-          alt="Interior de las bodegas io guardo — dos niveles con escaleras y bodegas grandes"
-          width={1600}
-          height={900}
-          className="h-auto w-full object-cover"
-          priority
-        />
-      </div>
+      <PhotoCarousel />
     </section>
   );
 }
@@ -266,78 +257,178 @@ function StorageSection() {
         <strong className="text-primary"> 7% dto. pago semestral/anual</strong>
       </p>
 
-      <PhotoCarousel />
     </section>
   );
 }
 
 const carouselPhotos = [
+  { src: "/interior-twofloor-wide.jpg", alt: "Estructura de dos pisos con escaleras" },
   { src: "/interior-lockers-wide.jpg", alt: "Pasillo de lockers y bodegas pequeñas numeradas" },
   { src: "/interior-corridor-wide.jpg", alt: "Pasillo de bodegas grandes en planta baja" },
-  { src: "/interior-twofloor-wide.jpg", alt: "Estructura de dos pisos con escaleras" },
   { src: "/location-exterior.jpg", alt: "Exterior de las instalaciones" },
 ];
 
 function PhotoCarousel() {
   const [current, setCurrent] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const next = useCallback(
     () => setCurrent((c) => (c + 1) % carouselPhotos.length),
     []
   );
-  const prev = () =>
-    setCurrent((c) => (c - 1 + carouselPhotos.length) % carouselPhotos.length);
+  const prev = useCallback(
+    () => setCurrent((c) => (c - 1 + carouselPhotos.length) % carouselPhotos.length),
+    []
+  );
 
   useEffect(() => {
+    if (isLightboxOpen) {
+      return;
+    }
     const timer = setInterval(next, 4000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [isLightboxOpen, next]);
+
+  useEffect(() => {
+    if (!isLightboxOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsLightboxOpen(false);
+      }
+      if (event.key === "ArrowRight") {
+        next();
+      }
+      if (event.key === "ArrowLeft") {
+        prev();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLightboxOpen, next, prev]);
 
   return (
-    <div className="relative mt-8 overflow-hidden rounded-2xl">
-      <div
-        className="flex transition-transform duration-500 ease-in-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
-      >
-        {carouselPhotos.map((photo) => (
-          <div key={photo.src} className="w-full flex-shrink-0">
+    <>
+      <div className="relative overflow-hidden rounded-3xl shadow-xl">
+        <div
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}
+        >
+          {carouselPhotos.map((photo) => (
+            <div key={photo.src} className="w-full flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                className="relative block aspect-[4/3] w-full cursor-zoom-in sm:aspect-[16/10]"
+                aria-label={`Abrir ${photo.alt}`}
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="(min-width: 640px) 80vw, 100vw"
+                  className="object-cover"
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={prev}
+          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-primary shadow backdrop-blur-sm transition hover:bg-white"
+          aria-label="Foto anterior"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+        <button
+          type="button"
+          onClick={next}
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-primary shadow backdrop-blur-sm transition hover:bg-white"
+          aria-label="Siguiente foto"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
+          {carouselPhotos.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCurrent(i)}
+              className={`h-2 rounded-full transition-all ${
+                i === current ? "w-6 bg-white" : "w-2 bg-white/50"
+              }`}
+              aria-label={`Ir a foto ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {isLightboxOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vista completa de la foto"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
+            aria-label="Cerrar foto"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              prev();
+            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
+            aria-label="Foto anterior"
+          >
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+
+          <div
+            className="relative flex max-h-full w-full max-w-6xl items-center justify-center"
+            onClick={(event) => event.stopPropagation()}
+          >
             <Image
-              src={photo.src}
-              alt={photo.alt}
+              src={carouselPhotos[current].src}
+              alt={carouselPhotos[current].alt}
               width={1600}
-              height={900}
-              className="h-56 w-full object-cover sm:h-72"
+              height={1067}
+              className="max-h-[85vh] w-auto max-w-full rounded-2xl object-contain"
             />
           </div>
-        ))}
-      </div>
-      <button
-        onClick={prev}
-        className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-primary shadow backdrop-blur-sm transition hover:bg-white"
-        aria-label="Foto anterior"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-primary shadow backdrop-blur-sm transition hover:bg-white"
-        aria-label="Siguiente foto"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </button>
-      <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
-        {carouselPhotos.map((_, i) => (
+
           <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`h-2 rounded-full transition-all ${
-              i === current ? "w-6 bg-white" : "w-2 bg-white/50"
-            }`}
-            aria-label={`Ir a foto ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              next();
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
+            aria-label="Siguiente foto"
+          >
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -482,11 +573,24 @@ function Contact() {
             </div>
           </div>
           <div>
-            <form className="space-y-4">
+            <form
+              action="https://formsubmit.co/ioguardoadmon@gmail.com"
+              method="POST"
+              className="space-y-4"
+            >
+              {/* FormSubmit config */}
+              <input type="hidden" name="_subject" value="Nuevo contacto desde io guardo" />
+              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_template" value="table" />
+              <input type="hidden" name="_next" value="https://ioguardo.mx/#contacto" />
+              <input type="text" name="_honey" className="hidden" />
+
               <label className="block text-sm font-semibold">
                 Nombre completo
                 <input
                   type="text"
+                  name="nombre"
+                  required
                   className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm placeholder:text-white/60 focus:border-secondary focus:outline-none"
                   placeholder="Tu nombre"
                 />
@@ -495,6 +599,8 @@ function Contact() {
                 Email
                 <input
                   type="email"
+                  name="email"
+                  required
                   className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm placeholder:text-white/60 focus:border-secondary focus:outline-none"
                   placeholder="tu@email.com"
                 />
@@ -503,13 +609,17 @@ function Contact() {
                 Teléfono
                 <input
                   type="tel"
+                  name="telefono"
                   className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm placeholder:text-white/60 focus:border-secondary focus:outline-none"
                   placeholder="Tu teléfono"
                 />
               </label>
               <label className="block text-sm font-semibold">
                 Tipo de mensaje
-                <select className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm text-white focus:border-secondary focus:outline-none">
+                <select
+                  name="tipo_mensaje"
+                  className="mt-2 w-full rounded-2xl border border-white/25 bg-transparent px-4 py-3 text-sm text-white focus:border-secondary focus:outline-none"
+                >
                   <option className="text-primary" value="cotizacion">
                     Quiero una cotización
                   </option>
